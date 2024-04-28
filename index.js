@@ -3,7 +3,7 @@ const cors = require("cors");
 const app = express();
 require("dotenv").config();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion} = require("mongodb");
 //middleware
 app.use(cors());
 app.use(express.json());
@@ -21,14 +21,11 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
     //collection list
-    const homeListCollection = client
-      .db("LakeFront-Estates")
-      .collection("HomeList");
-    const categoryCollection = client
-      .db("LakeFront-Estates")
-      .collection("homeCategory");
+    const homeListCollection = client.db("LakeFront-Estates").collection("HomeList");
+    const categoryCollection = client.db("LakeFront-Estates").collection("homeCategory");
+    const testimonialsCollection = client.db("LakeFront-Estates").collection("testimonials");
     //api to get all homelist
     app.get("/homeList", async (req, res) => {
       const query = {};
@@ -46,13 +43,28 @@ async function run() {
 
     //API to get category based homes
     app.get("/homes/:name", async (req, res) => {
-        const name = req.params.name;
-        const query = {
-          name: name};
-        const result = await homeListCollection.find(query).toArray();
-        console.log('api hit')
-        res.send(result);
-      });
+      const name = req.params.name;
+      const query = {
+        name: name,
+      };
+      const result = await homeListCollection.find(query).toArray();
+      res.send(result);
+    });
+    //API to get testimonials
+    app.get("/testimonials", async (req, res) => {
+      const query = {};
+      const result = await testimonialsCollection.find(query).toArray();
+      res.send(result);
+    });
+    //API to get specific home information
+    app.get("/home/:id", async (req, res) => {
+      const homeId = req.params.id;
+      const query = {
+        _id: homeId,
+      };
+      const result = await homeListCollection.find(query).toArray();
+      res.send(result);
+    });
   } finally {
   }
 }
