@@ -3,8 +3,9 @@ const cors = require("cors");
 const app = express();
 require("dotenv").config();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion} = require("mongodb");
-//middleware
+const { MongoClient, ServerApiVersion } = require("mongodb");
+
+//middleware use
 app.use(cors());
 app.use(express.json());
 
@@ -23,9 +24,36 @@ async function run() {
   try {
     // await client.connect();
     //collection list
-    const homeListCollection = client.db("LakeFront-Estates").collection("HomeList");
-    const categoryCollection = client.db("LakeFront-Estates").collection("homeCategory");
-    const testimonialsCollection = client.db("LakeFront-Estates").collection("testimonials");
+    const usersCollection = client.db("LakeFront-Estates").collection("Users");
+    const homeListCollection = client
+      .db("LakeFront-Estates")
+      .collection("HomeList");
+    const categoryCollection = client
+      .db("LakeFront-Estates")
+      .collection("homeCategory");
+    const testimonialsCollection = client
+      .db("LakeFront-Estates")
+      .collection("testimonials");
+
+    //API to store all user data in database
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      //insert user if they doesnt exist
+      //many ways for this(1.email.unique, 2.upsert,3.simple checking)
+      const query= {email:user.email}
+      const existingUser = await usersCollection.findOne(query);
+      if(existingUser){
+        return res.send({message:'user already exist',insertedId:null})
+      }
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
+//API to get all users
+app.get('/users', async(req,res)=>{
+const query = {};
+const result = await usersCollection.find(query).toArray();
+res.send(result)
+})
     //api to get all homelist
     app.get("/homeList", async (req, res) => {
       const query = {};
