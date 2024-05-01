@@ -62,6 +62,22 @@ const verifyToken = (req,res,next) =>{
  
   next()
 }
+//verify admin
+
+const verifyAdmin = async (req,res,next) =>{
+  const email = req.decoded.email;
+  const query = {email:email};
+  const user = await usersCollection.findOne(query);
+  const isAdmin = user?.role === 'admin';
+  if(!isAdmin){
+    return res.status(403).send({message:'forbidden'})
+  }
+  next();
+
+}
+
+
+
 
 //admin
 app.get('/user/admin/:email',verifyToken,async(req,res)=>{
@@ -93,21 +109,21 @@ res.send({admin});
       res.send(result);
     });
 //API to get all users
-app.get('/users', verifyToken,  async(req,res)=>{
+app.get('/users', verifyToken,verifyAdmin,  async(req,res)=>{
   console.log(req.headers)
 const query = {};
 const result = await usersCollection.find(query).toArray();
 res.send(result)
 })
 //delete a user
-app.delete('/users/:id',async(req,res)=>{
+app.delete('/users/:id',verifyToken,verifyAdmin,async(req,res)=>{
   const id = req.params.id;
   const query={_id: new ObjectId(id)}
   const result = await usersCollection.deleteOne(query);
   res.send(result)
 })
 //
-app.patch('/users/admin/:id',async(req,res)=>{
+app.patch('/users/admin/:id',verifyToken,verifyAdmin,async(req,res)=>{
   const id = req.params.id;
   const filter = {_id:new ObjectId(id)}
   const updatedDoc = {
