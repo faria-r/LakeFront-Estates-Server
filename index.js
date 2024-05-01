@@ -3,7 +3,7 @@ const cors = require("cors");
 const app = express();
 require("dotenv").config();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 //middleware use
 app.use(cors());
@@ -52,6 +52,25 @@ async function run() {
 app.get('/users', async(req,res)=>{
 const query = {};
 const result = await usersCollection.find(query).toArray();
+res.send(result)
+})
+//delete a user
+app.delete('/users/:id',async(req,res)=>{
+  const id = req.params.id;
+  const query={_id: new ObjectId(id)}
+  const result = await usersCollection.deleteOne(query);
+  res.send(result)
+})
+//
+app.patch('/users/admin/:id',async(req,res)=>{
+  const id = req.params.id;
+  const filter = {_id:new ObjectId(id)}
+  const updatedDoc = {
+    $set:{
+      role:'admin'
+    }
+  }
+  const result = await usersCollection.updateOne(filter,updatedDoc)
 res.send(result)
 })
     //api to get all homelist
