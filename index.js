@@ -38,6 +38,9 @@ async function run() {
     const favouritesCollection = client
       .db("LakeFront-Estates")
       .collection("favourites");
+    const schedulesCollection = client
+      .db("LakeFront-Estates")
+      .collection("schedules");
 
     //JWT Token
     app.post("/jwt", async (req, res) => {
@@ -106,6 +109,18 @@ async function run() {
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
+    //store schedules
+    app.post('/schedules',async(req,res)=>{
+      const schedule = req.body;
+      const result = await schedulesCollection.insertOne(schedule);
+      res.send(result);
+    })
+    //get all schedules
+app.get('/schedules',  verifyToken, verifyAdmin, async(req,res)=>{
+  const query ={};
+  const result = await schedulesCollection.find(query).toArray();
+  res.send(result)
+})
     //API to store users favourites
     app.post('/favourites', async(req,res)=>{
       const favourites = req.body;
@@ -126,7 +141,6 @@ async function run() {
     })
     //API to get all users
     app.get("/users", verifyToken, verifyAdmin, async (req, res) => {
-      console.log(req.headers);
       const query = {};
       const result = await usersCollection.find(query).toArray();
       res.send(result);
