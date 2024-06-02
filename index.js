@@ -215,6 +215,13 @@ async function run() {
       const result = await homeListCollection.find(query).toArray();
       res.send(result);
     });
+    //API to post review on website
+    app.post('/addReview',async(req,res)=>{
+      const review = req.body;
+      const result = await testimonialsCollection.insertOne(review);
+      res.send(result)
+
+    })
   } finally {
   }
 }
