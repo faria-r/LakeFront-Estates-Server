@@ -8,7 +8,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 //middleware use
 app.use(cors());
-app.use(express.json()); 
+app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wxeycza.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -48,12 +48,10 @@ async function run() {
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "3h",
       });
-      console.log(token);
       res.send({ token });
     });
     //verify Middlewares-jwt
     const verifyToken = (req, res, next) => {
-      console.log("inside verify token", req.headers.authorization);
       if (!req.headers.authorization) {
         return res.status(401).send({ message: "unauthorized access" });
       }
@@ -110,35 +108,44 @@ async function run() {
       res.send(result);
     });
     //store schedules
-    app.post('/schedules',async(req,res)=>{
+    app.post("/schedules", async (req, res) => {
       const schedule = req.body;
       const result = await schedulesCollection.insertOne(schedule);
       res.send(result);
-    })
+    });
     //get all schedules
-app.get('/schedules',  verifyToken, verifyAdmin, async(req,res)=>{
-  const query ={};
-  const result = await schedulesCollection.find(query).toArray();
-  res.send(result)
-})
+    app.get("/schedules", verifyToken, verifyAdmin, async (req, res) => {
+      const query = {};
+      const result = await schedulesCollection.find(query).toArray();
+      res.send(result);
+    });
+    // API to post home in the server
+    app.post('/addHome',async(req,res)=>{
+      const homeInfo = req.body;
+      const result = await homeListCollection.insertOne(homeInfo);
+      res.send(result);
+    })
     //API to store users favourites
-    app.post('/favourites', async(req,res)=>{
+    app.post("/favourites", async (req, res) => {
       const favourites = req.body;
-      const query = {homeID : favourites.homeID,};
+      const query = { homeID: favourites.homeID };
       const existingHome = await favouritesCollection.findOne(query);
-      if(existingHome){
-        return res.send({message:'already added to favourites', insertedId:null});
+      if (existingHome) {
+        return res.send({
+          message: "already added to favourites",
+          insertedId: null,
+        });
       }
       const result = await favouritesCollection.insertOne(favourites);
-      res.send(result)
-    }) 
+      res.send(result);
+    });
     //API to get favourites based on users
-    app.get('/favourites/:email', async (req,res)=>{
+    app.get("/favourites/:email", async (req, res) => {
       const email = req.params.email;
-      const query = {userEmail:email}
+      const query = { userEmail: email };
       const result = await favouritesCollection.find(query).toArray();
-      res.send(result)
-    })
+      res.send(result);
+    });
     //API to get all users
     app.get("/users", verifyToken, verifyAdmin, async (req, res) => {
       const query = {};
