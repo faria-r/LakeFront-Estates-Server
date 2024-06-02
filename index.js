@@ -8,7 +8,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 //middleware use
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wxeycza.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -131,7 +131,7 @@ app.get('/schedules',  verifyToken, verifyAdmin, async(req,res)=>{
       }
       const result = await favouritesCollection.insertOne(favourites);
       res.send(result)
-    })
+    }) 
     //API to get favourites based on users
     app.get('/favourites/:email', async (req,res)=>{
       const email = req.params.email;
@@ -203,7 +203,7 @@ app.get('/schedules',  verifyToken, verifyAdmin, async(req,res)=>{
     app.get("/home/:id", async (req, res) => {
       const homeId = req.params.id;
       const query = {
-        _id: homeId,
+        _id: new ObjectId(homeId),
       };
       const result = await homeListCollection.find(query).toArray();
       res.send(result);
